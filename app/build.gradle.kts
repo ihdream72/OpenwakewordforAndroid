@@ -40,5 +40,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("org.apache.commons:commons-math3:3.6.1")
-    implementation ("com.microsoft.onnxruntime:onnxruntime-android:1.16.0-rc1")
+//    implementation ("com.microsoft.onnxruntime:onnxruntime-android:1.16.0-rc1")
+    implementation ("com.microsoft.onnxruntime:onnxruntime-android:1.20.0")
 }

@@ -31,6 +31,11 @@ class ONNXModelRunner {
         this.assetManager=assetManager;
 
         try {
+
+//            OrtSession.SessionOptions opts = new OrtSession.SessionOptions();
+//            opts.addConfigEntry("session.use_cpu", "true");
+//
+//            hey_nugget_session = hey_nugget_env.createSession(readModelFile(assetManager, "hey_nugget_new.onnx"), opts);
             hey_nugget_session = hey_nugget_env.createSession(readModelFile(assetManager, "hey_nugget_new.onnx"));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -44,6 +49,11 @@ class ONNXModelRunner {
         try (InputStream modelInputStream = assetManager.open("melspectrogram.onnx")) {
             byte[] modelBytes = new byte[modelInputStream.available()];
             modelInputStream.read(modelBytes);
+
+//            OrtSession.SessionOptions opts = new OrtSession.SessionOptions();
+//            opts.addConfigEntry("session.use_cpu", "true");
+//
+//            session = OrtEnvironment.getEnvironment().createSession(modelBytes, opts);
             session = OrtEnvironment.getEnvironment().createSession(modelBytes);
         }
         float[][] outputArray=null;
@@ -109,6 +119,10 @@ class ONNXModelRunner {
         is.read(model);
         is.close();
 
+//        OrtSession.SessionOptions opts = new OrtSession.SessionOptions();
+//        opts.addConfigEntry("session.use_cpu", "true");
+//
+//        OrtSession sess = env.createSession(model, opts);
         OrtSession sess = env.createSession(model);
         OnnxTensor inputTensor = OnnxTensor.createTensor(env, input);
         try (OrtSession.Result results = sess.run(Collections.singletonMap("input_1", inputTensor))) {

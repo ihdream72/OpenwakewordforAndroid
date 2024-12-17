@@ -22,7 +22,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -84,6 +85,7 @@ class AudioRecorderThread extends Thread {
     private boolean isRecording = false;
     private Context context;
     private TextView melspectext,predicted_text;
+    private List<Double> predictList = new ArrayList<>();
     ONNXModelRunner modelRunner;
     Model model;
     AudioRecorderThread (Context context,TextView melspec,TextView predicted_text,ONNXModelRunner modelRunner, Model model)
@@ -111,6 +113,7 @@ class AudioRecorderThread extends Thread {
 
         if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
             // Initialization error handling
+            Log.d("TEST-WAKE", "Initialization error");
             return;
         }
 
@@ -128,22 +131,50 @@ class AudioRecorderThread extends Thread {
                 // Convert by dividing by the maximum value of short to normalize
                 floatBuffer[i] = audioBuffer[i] / 32768.0f; // Normalize to range -1.0 to 1.0 if needed
             }
+            //Log.d("TEST-WAKE", "모델 실행전");
             String res=model.predict_WakeWord(floatBuffer);
+            //Log.d("TEST-WAKE", "모델 실행후");
             ((Activity) context).runOnUiThread(new Runnable() {
                 public void run() {
+
+                    if(predictList.size() >= 10) {
+                        predictList.remove(predictList.size()-1);
+                    }
+
+                    predictList.add(0, Double.parseDouble(res));
+
+                    double average = averageList(predictList);
+
                     melspectext.setText(res);
-                    if (Double.parseDouble(res) > 0.05) {
-                        predicted_text.setText("Wake Word Detected!");
+
+                    if (average > 0.002 /*0.005*/) {
+                        predicted_text.setText("Wake Word Detected! - " + String.format("%.5f", average));
 
                     }
                     else{
                         predicted_text.setText("");
                     }
+
+//                    if (Double.parseDouble(res) > 0.003 /*0.005*/) {
+//                        predicted_text.setText("Wake Word Detected!");
+//
+//                    }
+//                    else{
+//                        predicted_text.setText("");
+//                    }
                 }
             });
         }
 
         releaseResources();
+    }
+
+    public static double averageList(List<Double> list) {
+        double sum = 0.0;
+        for (Double value : list) {
+            sum += value;
+        }
+        return sum/list.size();
     }
 
     public void stopRecording() {
